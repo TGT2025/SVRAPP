@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SVR LAB | Upload</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+  <div class="text-center">
+    <img src="logo-svr.png" alt="SVR LAB" class="w-32 mx-auto mb-4">
+    <h1 class="text-xl font-semibold mb-6">SVR LAB | Upload</h1>
+
+    <div id="step1">
+      <p class="mb-2">Selecione uma opção:</p>
+      <button onclick="chooseOption('CheckIN')" class="bg-orange-600 p-2 rounded mb-2 w-full">Check-IN</button>
+      <button onclick="chooseOption('CheckOUT')" class="bg-orange-600 p-2 rounded mb-2 w-full">Check-OUT</button>
+      <button onclick="chooseOption('CONTENT')" class="bg-orange-600 p-2 rounded w-full">Mídia</button>
+    </div>
+
+    <div id="step2" class="hidden">
+      <input id="placa" type="text" placeholder="Digite a placa" class="mb-4 p-2 bg-gray-800 rounded text-center">
+      <button onclick="confirmPlaca()" class="bg-green-600 p-2 rounded">Confirmar Placa</button>
+      <button onclick="resetFlow()" class="mt-2 block mx-auto underline">Voltar</button>
+    </div>
+
+    <div id="step3" class="hidden">
+      <input id="fileInput" type="file" accept="image/*,video/*" capture="environment" class="mb-4 p-2 bg-gray-800 rounded block mx-auto">
+      <button id="uploadBtn" class="bg-orange-600 p-2 rounded">Enviar Arquivo</button>
+      <p id="status" class="mt-4"></p>
+      <button onclick="resetFlow()" class="mt-2 underline">Nova Operação</button>
+    </div>
+  </div>
+
+<script>
+  // Firebase Config
+  const firebaseConfig = {
+    apiKey: "AIzaSyA-nPIkD_Zbyy6IIeDFdAiCJlW8ZWulMuk",
+    authDomain: "svr-app-84b9f.firebaseapp.com",
+    projectId: "svr-app-84b9f",
+    storageBucket: "svr-app-84b9f.appspot.com",
+    messagingSenderId: "466245844914",
+    appId: "1:466245844914:web:606dc88a28cb57bab16eab"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const storage = firebase.storage();
+
+  let chosenOption = '';
+  let placa = '';
+
+  function chooseOption(option) {
+    chosenOption = option;
+    document.getElementById('step1').classList.add('hidden');
+    document.getElementById('step2').classList.remove('hidden');
+  }
+
+  function confirmPlaca() {
+    placa = document.getElementById('placa').value.trim();
+    if (!placa) {
+      alert('Digite a placa do veículo.');
+      return;
+    }
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step3').classList.remove('hidden');
+  }
+
+  function resetFlow() {
+    document.getElementById('placa').value = '';
+    document.getElementById('fileInput').value = '';
+    document.getElementById('status').innerText = '';
+    document.getElementById('step1').classList.remove('hidden');
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step3').classList.add('hidden');
+  }
+
+  document.getElementById('uploadBtn').onclick = () => {
+    const file = document.getElementById('fileInput').files[0];
+    if (!file) {
+      document.getElementById('status').innerText = "❌ Escolha um arquivo para enviar.";
+      return;
+    }
+
+    const filename = `${Date.now()}_${file.name}`;
+    const path = `${placa}/${chosenOption}/${filename}`;
+    const ref = storage.ref(path);
+
+    document.getElementById('status').innerText = "⏳ Enviando...";
+    console.log("🟡 Uploading to:", path);
+
+    ref.put(file).then(snapshot => {
+      document.getElementById('status').innerText = "✅ Arquivo enviado com sucesso!";
+      console.log("✅ Upload complete:", snapshot);
+    }).catch((error) => {
+      document.getElementById('status').innerText = "❌ Falha ao enviar.";
+      console.error("❌ Upload error:", error);
+    });
+  };
+</script>
+
+</body>
+</html>
