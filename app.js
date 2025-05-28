@@ -216,13 +216,16 @@ function loadClienteEtapa(etapa, container) {
           img.onclick = ()=>openLightbox(url, 'img');
           grid.appendChild(img);
         }
-      });
+      }).catch(()=>{}); // <- erro individual de mídia não trava a galeria
     });
+    // Comentário da etapa (tratamento seguro)
     storage.ref(`${userPlaca}/${etapa}/comentario.txt`).getDownloadURL().then(url=>{
       fetch(url).then(r=>r.text()).then(txt=>{
         galeria.innerHTML += `<div class="mt-3 mb-1 px-2 text-[#fd7d1c] text-sm">Comentário da equipe: ${txt}</div>`;
-      });
+      }).catch(()=>{});
     }).catch(()=>{});
+  }).catch(()=>{
+    galeria.innerHTML = `<div class="text-[#fd7d1c] mt-2">Nenhuma mídia encontrada.</div>`;
   });
 }
 
@@ -388,13 +391,15 @@ function loadAdminEtapa(placa, etapa, area) {
           img.onclick = ()=>openLightbox(url, 'img');
           grid.appendChild(img);
         }
-      });
+      }).catch(()=>{});
     });
     storage.ref(`${placa}/${etapa}/comentario.txt`).getDownloadURL().then(url=>{
       fetch(url).then(r=>r.text()).then(txt=>{
         galeria.innerHTML += `<div class="mt-3 mb-1 px-2 text-[#fd7d1c] text-sm">Comentário da equipe: ${txt}</div>`;
-      });
+      }).catch(()=>{});
     }).catch(()=>{});
+  }).catch(()=>{
+    galeria.innerHTML = `<div class="text-[#fd7d1c] mt-2">Nenhuma mídia encontrada.</div>`;
   });
 }
 
