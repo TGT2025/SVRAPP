@@ -45,7 +45,7 @@ export function showEquipeFlow() {
         <h1 class="text-xl font-bold mb-5 text-orange-500">Equipe - Digite a placa</h1>
         <input id="placaEquipeInput" type="text" maxlength="8" placeholder="Placa" class="w-full bg-gray-800 rounded px-3 py-2 mb-4 text-center outline-none text-white text-xl tracking-widest uppercase">
         <button class="w-full btn-grad py-2 rounded mb-2" id="btnAvancarPlacaEquipe">Avançar</button>
-        <button class="w-full bg-gray-800 text-white py-2 rounded" id="btnSairEquipePlaca">Voltar</button>
+        <button class="w-full bg-gray-800 py-2 rounded" id="btnSairEquipePlaca">Voltar</button>
       </div>
     `;
     document.getElementById('placaEquipeInput').focus();
@@ -75,7 +75,7 @@ export function showEquipeFlow() {
           <button class="btn-grad w-full py-4 text-lg font-bold" data-aba="Processos">Processos</button>
           <button class="btn-grad w-full py-4 text-lg font-bold" data-aba="ShowOff">Show Off</button>
         </div>
-        <button class="w-full bg-gray-800 text-white py-2 rounded" id="btnSairAbaEquipe">Voltar</button>
+        <button class="w-full bg-gray-800 py-2 rounded" id="btnSairAbaEquipe">Voltar</button>
       </div>
     `;
     flow.querySelectorAll('[data-aba]').forEach(btn => {
@@ -108,9 +108,9 @@ function renderEtapas(flow) {
   flow.innerHTML = `
     <div class="w-full max-w-md mx-auto bg-[#263722] rounded-xl shadow-lg p-8 flex flex-col items-center">
       <img src="logo-svr.png" class="w-20 mx-auto mb-4" alt="SVR">
-      <h1 class="text-xl font-bold mb-2 text-orange-500">${aba} (${etapaAtual + 1}/${etapas.length})</h1>
+      <h1 class="text-xl font-bold mb-2 text-orange-500">${aba} (${etapaAtual+1}/${etapas.length})</h1>
       <div id="passoContainerEquipe" class="w-full"></div>
-      <button class="w-full bg-gray-800 text-white py-2 rounded mt-4" id="btnSairEtapasEquipe">Cancelar</button>
+      <button class="w-full bg-gray-800 py-2 rounded mt-4" id="btnSairEtapasEquipe">Cancelar</button>
     </div>
   `;
   document.getElementById('btnSairEtapasEquipe').onclick = () => {
@@ -175,19 +175,6 @@ function renderEtapas(flow) {
     };
   } else {
     container.innerHTML = `<div class="text-center text-green-400 text-2xl font-bold mb-8">${aba} Completo!</div>`;
-    // Adiciona box de comentário ao final do fluxo
-    let boxComentario = document.createElement("div");
-    boxComentario.className = "w-full mt-4";
-    boxComentario.innerHTML = `
-      <div class="font-bold text-orange-400 mb-1">Comentários:</div>
-      <div id="comentarioEquipe" class="bg-gray-800 text-white px-3 py-2 rounded text-sm min-h-[2em]">Carregando...</div>
-    `;
-    container.appendChild(boxComentario);
-    storage.ref(`${placa}/${aba}/Comentario.txt`).getDownloadURL()
-      .then(url => fetch(url).then(r => r.text()).then(txt => {
-        document.getElementById('comentarioEquipe').textContent = txt || "(Sem comentários)";
-      }))
-      .catch(() => document.getElementById('comentarioEquipe').textContent = "(Sem comentários)");
   }
 }
 
@@ -218,12 +205,11 @@ function renderGridEquipe(flow) {
       <input id="placaEquipe" type="text" maxlength="8" placeholder="Digite a placa" class="w-full bg-gray-800 rounded px-3 py-2 mb-4 text-center outline-none text-white text-xl tracking-widest uppercase" value="${AppState.placa||""}" disabled>
       <div id="uploadEquipe" class="w-full flex flex-col items-center mb-4">
         <input id="fileEquipe" type="file" accept="image/*,video/*" multiple class="fileinput w-full mb-2">
-        <button class="w-full btn-grad py-3 rounded text-lg font-bold" id="btnEnviarEquipe">Enviar Mídia</button>
+        <button class="w-full btn-grad py-2 rounded" id="btnEnviarEquipe">Enviar Mídia</button>
         <div id="statusEquipe" class="text-sm text-center mt-1 mb-2 text-green-400"></div>
       </div>
       <div id="gridEquipe" class="w-full grid grid-cols-2 gap-2 mt-2"></div>
-      <div id="boxComentarioGridEquipe"></div>
-      <button class="w-full bg-gray-800 text-white mt-6 py-2 rounded" id="btnSairEquipeGrid">Voltar</button>
+      <button class="w-full bg-gray-800 mt-6 py-2 rounded" id="btnSairEquipeGrid">Voltar</button>
     </div>
   `;
   renderEquipeGrid();
@@ -259,8 +245,8 @@ async function handleEquipeUpload() {
   }
   btn.disabled = false;
   btn.textContent = "Enviar Mídia";
-  document.getElementById('fileEquipe').value = "";
   status.textContent = "✅ Mídia(s) enviada(s)!";
+  document.getElementById('fileEquipe').value = "";
   renderEquipeGrid();
 }
 
@@ -286,22 +272,6 @@ function renderEquipeGrid() {
         mediaEl.onclick = () => showModal(url, ext.match(/mp4|webm|mov|avi/) ? "video" : "img");
         grid.appendChild(div);
       });
-    }
-    // Adiciona o box de comentário se for CheckIN ou CheckOUT
-    if (aba === "CheckIN" || aba === "CheckOUT") {
-      const gridParent = grid.parentElement;
-      let boxComentario = document.createElement("div");
-      boxComentario.className = "w-full mt-4";
-      boxComentario.innerHTML = `
-        <div class="font-bold text-orange-400 mb-1">Comentários:</div>
-        <div id="comentarioEquipe" class="bg-gray-800 text-white px-3 py-2 rounded text-sm min-h-[2em]">Carregando...</div>
-      `;
-      gridParent.appendChild(boxComentario);
-      storage.ref(`${placa}/${aba}/Comentario.txt`).getDownloadURL()
-        .then(url => fetch(url).then(r => r.text()).then(txt => {
-          document.getElementById('comentarioEquipe').textContent = txt || "(Sem comentários)";
-        }))
-        .catch(() => document.getElementById('comentarioEquipe').textContent = "(Sem comentários)");
     }
   });
 }
